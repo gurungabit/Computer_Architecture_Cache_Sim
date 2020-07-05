@@ -50,3 +50,38 @@ print("Overhead size:", "\t\t\t", overHead, "bytes")
 print("Implementation Memory Size: \t {:.2f} KB (%d bytes)".format(
     impMemorySize) % impMemorySizeBytes)
 print('Cost: ${:.2f}'.format(cost))
+
+
+def readFirstTwenty():
+    with open(traceFile) as f:
+        lines = f.readlines()
+        count = 0
+        for index, line in enumerate(lines):
+            if count >= 20:
+                break
+            if line == '\n' or line[0:5] == 'dstM:':
+                continue
+            item = line.strip().split()
+            print(hex(int(item[2], 16)), "(%d)" % int(item[1][1:3]))
+            count += 1
+
+
+readFirstTwenty()
+
+
+def Simuation():
+    with open(traceFile) as f:
+        lines = f.readlines()
+        for index, line in enumerate(lines):
+            if line == '\n':
+                continue
+            item = line.strip().split()
+            if item[0] == "dstM:":
+                if item[1] == "00000000" and item[4] == "00000000":
+                    continue
+                else:
+                    print(lines[index-1])
+                    print(line)
+
+
+# Simuation()
