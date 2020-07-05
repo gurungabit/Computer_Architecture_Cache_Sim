@@ -1,0 +1,40 @@
+Cache Simulator - CS 3853 Summer 2020 - Group ##(what is it?)
+
+Trace File: Trace1.trc 
+
+***** Cache Input Parameters *****
+Cache Size: 			 512 KB
+Block Size: 			 16 bytes
+Associativity: 			 8
+Replacement Policy: 		 RR
+
+ ***** Cache Calculated Values ***** 
+
+Total Blocks: 			 32768
+Tag Size: 			 16 bits
+Index Size: 			 12 bits
+Total # Rows: 			 4096
+Overhead size: 			 69632 bytes
+Implementation Memory Size: 	 580.00 KB (593920.00 bytes)
+Cost: 				 $40.60
+
+0x7c81eb33 (1)
+0x7c81eb34 (1)
+0x7c81eb35 (3)
+0x78158e69 (1)
+0x78158e6a (3)
+0x1763891 (1)
+0x1763892 (1)
+0x1763893 (1)
+0x1763894 (1)
+0x1763895 (1)
+0x1763896 (1)
+0x1763897 (1)
+0x1763898 (1)
+0x1763899 (1)
+0x176389a (1)
+0x176389b (1)
+0x176389c (1)
+0x176389d (1)
+0x176389e (1)
+0x176389f (1)

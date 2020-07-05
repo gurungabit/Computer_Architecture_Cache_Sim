@@ -1,10 +1,10 @@
 import sys
 import math
-if len(sys.argv) < 11:
+if len(sys.argv) < 9:
     print(
         "Usage", sys.argv[0], "–f <trace file name> –s <cache size in KB> –b <block size> –a <associativity> –r <replacement policy>")
     exit(0)
-traceFile = None
+traceFile = ""
 cacheSize = None
 blockSize = None
 associativity = None
@@ -21,7 +21,8 @@ for index, item in enumerate(sys.argv):
     elif item == '-r':
         replacementPolicy = sys.argv[index+1]
     else:
-        pass
+        continue
+print("Cache Simulator - CS 3853 Summer 2020 - Group ##(what is it?)")
 print("\nTrace File:", traceFile, "\n")
 print("*"*5, "Cache Input Parameters", "*"*5)
 print("Cache Size:", "\t\t\t", cacheSize, "KB")
@@ -33,8 +34,10 @@ associativityBits = int(math.log(associativity, 2))
 accessBits = int(math.log(cacheSize, 2) + 10)
 offsetBits = int(math.log(blockSize, 2))
 cacheIndexBits = accessBits - offsetBits - associativityBits
+print(cacheIndexBits)
 tagSize = cacheIndexBits + offsetBits
 totalNumRows = pow(2, cacheIndexBits)  # also can be called number of sets
+# int((cacheSize*pow(2,10))/blockSize)
 totalNumBlocks = totalNumRows * associativity
 addressSpaceBits = tagSize*2
 overHead = pow(2, tagSize) + totalNumRows
@@ -47,41 +50,29 @@ print("Tag Size:", "\t\t\t", tagSize, "bits")
 print("Index Size:", "\t\t\t", cacheIndexBits, "bits")
 print("Total # Rows:", "\t\t\t", totalNumRows)
 print("Overhead size:", "\t\t\t", overHead, "bytes")
-print("Implementation Memory Size: \t {:.2f} KB (%d bytes)".format(
-    impMemorySize) % impMemorySizeBytes)
-print('Cost: ${:.2f}'.format(cost))
+print("Implementation Memory Size: \t {:.2f} KB ({:.2f} bytes)".format(
+    impMemorySize, impMemorySizeBytes))
+print('Cost: \t\t\t\t ${:.2f}'.format(cost))
+print()
 
 
 def readFirstTwenty():
-    with open(traceFile) as f:
-        lines = f.readlines()
-        count = 0
-        for index, line in enumerate(lines):
-            if count >= 20:
-                break
-            if line == '\n' or line[0:5] == 'dstM:':
-                continue
-            item = line.strip().split()
-            print(hex(int(item[2], 16)), "(%d)" % int(item[1][1:3]))
-            count += 1
+    try:
+        with open(traceFile) as f:
+            lines = f.readlines()
+            count = 0
+            for index, line in enumerate(lines):
+                if count >= 20:
+                    break
+                if line == '\n' or line[0:5] == 'dstM:':
+                    continue
+                item = line.strip().split()
+                print(hex(int(item[2], 16)),
+                      "({:d})" .format(int(item[1][1:3])))
+                count += 1
+    except FileNotFoundError:
+        print("File not found or no file was given!")
+        pass
 
 
 readFirstTwenty()
-
-
-def Simuation():
-    with open(traceFile) as f:
-        lines = f.readlines()
-        for index, line in enumerate(lines):
-            if line == '\n':
-                continue
-            item = line.strip().split()
-            if item[0] == "dstM:":
-                if item[1] == "00000000" and item[4] == "00000000":
-                    continue
-                else:
-                    print(lines[index-1])
-                    print(line)
-
-
-# Simuation()
