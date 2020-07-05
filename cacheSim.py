@@ -38,9 +38,15 @@ totalNumRows = pow(2, cacheIndexBits)  # also can be called number of sets
 totalNumBlocks = totalNumRows * associativity
 addressSpaceBits = tagSize*2
 overHead = pow(2, tagSize) + totalNumRows
+impMemorySize = cacheSize + overHead / pow(2, 10)
+impMemorySizeBytes = impMemorySize * pow(2, 10)
+cost = impMemorySize * 0.07
 print("\n", "*"*5, "Cache Calculated Values", "*"*5, "\n")
 print("Total Blocks:", "\t\t\t", totalNumBlocks)
 print("Tag Size:", "\t\t\t", tagSize, "bits")
 print("Index Size:", "\t\t\t", cacheIndexBits, "bits")
 print("Total # Rows:", "\t\t\t", totalNumRows)
 print("Overhead size:", "\t\t\t", overHead, "bytes")
+print("Implementation Memory Size: \t {:.2f} KB (%d bytes)".format(
+    impMemorySize) % impMemorySizeBytes)
+print('Cost: ${:.2f}'.format(cost))
