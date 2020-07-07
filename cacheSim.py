@@ -71,10 +71,11 @@ def readFirstTwenty():
                     if item[1] != "00000000":
                         print(hex(int(item[1], 16)),
                               "({:s})" .format(length))
+                        count += 1
                     if item[4] != "00000000":
                         print(hex(int(item[4], 16)),
                               "({:s})" .format(length))
-                    count += 1
+                        count += 1
                 else:
                     length = item[1][1:3]
                     print(hex(int(item[2], 16)),
