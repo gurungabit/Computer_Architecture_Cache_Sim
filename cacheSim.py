@@ -60,19 +60,30 @@ def readFirstTwenty():
         with open(traceFile) as f:
             lines = f.readlines()
             count = 0
-            for index, line in enumerate(lines):
+            length = 0
+            for line in lines:
                 if count >= 20:
                     break
-                if line == '\n' or line[0:5] == 'dstM:':
+                if line == '\n':
                     continue
                 item = line.strip().split()
-                print(hex(int(item[2], 16)),
-                      "({:d})" .format(int(item[1][1:3])))
+                if item[0] == 'dstM:':
+                    if item[1] != "00000000":
+                        print(hex(int(item[1], 16)),
+                              "({:s})" .format(length))
+                    if item[4] != "00000000":
+                        print(hex(int(item[4], 16)),
+                              "({:s})" .format(length))
+                    count += 1
+                else:
+                    length = item[1][1:3]
+                    print(hex(int(item[2], 16)),
+                          "({:s})" .format(length))
+                    count += 1
                 # hexNum = int(item[2], 16)
                 # num2 = int(item[2], 16)
                 # sum = hexNum + num2
                 # print(hex(sum))
-                count += 1
     except FileNotFoundError:
         print("File not found or no file was given!")
         pass
