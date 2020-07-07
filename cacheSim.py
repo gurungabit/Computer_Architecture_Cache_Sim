@@ -22,7 +22,7 @@ for index, item in enumerate(sys.argv):
         replacementPolicy = sys.argv[index+1]
     else:
         continue
-print("Cache Simulator - CS 3853 Summer 2020 - Group ##(what is it?)")
+print("Cache Simulator - CS 3853 Summer 2020 - Group 7")
 print("\nTrace File:", traceFile, "\n")
 print("*"*5, "Cache Input Parameters", "*"*5)
 print("Cache Size:", "\t\t\t", cacheSize, "KB")
@@ -69,6 +69,10 @@ def readFirstTwenty():
                 item = line.strip().split()
                 print(hex(int(item[2], 16)),
                       "({:d})" .format(int(item[1][1:3])))
+                # hexNum = int(item[2], 16)
+                # num2 = int(item[2], 16)
+                # sum = hexNum + num2
+                # print(hex(sum))
                 count += 1
     except FileNotFoundError:
         print("File not found or no file was given!")
@@ -76,3 +80,21 @@ def readFirstTwenty():
 
 
 readFirstTwenty()
+
+
+# def Simuation():
+#     with open(traceFile) as f:
+#         lines = f.readlines()
+#         for index, line in enumerate(lines):
+#             if line == '\n':
+#                 continue
+#             item = line.strip().split()
+#             if item[0] == "dstM:":
+#                 if item[1] == "00000000" and item[4] == "00000000":
+#                     continue
+#                 else:
+#                     print(lines[index-1])
+#                     print(line)
+
+
+# Simuation()
