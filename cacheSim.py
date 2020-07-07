@@ -34,12 +34,11 @@ associativityBits = int(math.log(associativity, 2))
 accessBits = int(math.log(cacheSize, 2) + 10)
 offsetBits = int(math.log(blockSize, 2))
 cacheIndexBits = accessBits - offsetBits - associativityBits
-print(cacheIndexBits)
-tagSize = cacheIndexBits + offsetBits
+addressSpaceBits = 32
+tagSize = addressSpaceBits - cacheIndexBits - offsetBits
 totalNumRows = pow(2, cacheIndexBits)  # also can be called number of sets
 # int((cacheSize*pow(2,10))/blockSize)
 totalNumBlocks = totalNumRows * associativity
-addressSpaceBits = tagSize*2
 overHead = pow(2, tagSize) + totalNumRows
 impMemorySize = cacheSize + overHead / pow(2, 10)
 impMemorySizeBytes = impMemorySize * pow(2, 10)
