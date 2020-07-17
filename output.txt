@@ -1,0 +1,76 @@
+ache Simulator - CS 3853 - Instructor Version: 2.03
+
+Trace File: A-9_new_1.5.pdf.trc
+
+ Cache Input Parameters 
+
+Cache Size:                     512 KB
+Block Size:                     32 bytes
+Associativity:                  4
+Replacement Policy:             Round Robin
+
+ Cache Calculated Values 
+
+Total # Blocks:                 16384
+Tag Size:                       15 bits
+Index Size:                     12 bits
+Total # Rows:                   4096
+Overhead Size:                  32768  bytes
+Implementation Memory Size:     544.00 KB  (557056 bytes)
+Cost:                           $27.20
+
+
+ CACHE SIMULATION RESULTS  
+
+Total Cache Accesses:   373450  (350466 addresses)
+Cache Hits:             365734
+Cache Misses:           7716
+--- Compulsory Misses:     7339
+--- Conflict Misses:       377
+
+
+   CACHE HIT & MISS RATE:   
+
+Hit  Rate:              97.9339%
+Miss Rate:              2.0661%
+CPI:                    4.46 Cycles/Instruction  (260322)
+Unused Cache Space:     300.32 KB / 544.00 KB = 55.21%  Waste: $15.02
+Unused Cache Blocks:    9045 / 16384
+Cache Simulator - CS 3853 - Instructor Version: 2.03
+
+Trace File: A-9_new_1.5.pdf.trc
+
+ Cache Input Parameters 
+
+Cache Size:                     1024 KB
+Block Size:                     64 bytes
+Associativity:                  8
+Replacement Policy:             Random
+
+ Cache Calculated Values 
+
+Total # Blocks:                 16384
+Tag Size:                       15 bits
+Index Size:                     11 bits
+Total # Rows:                   2048
+Overhead Size:                  32768  bytes
+Implementation Memory Size:     1056.00 KB  (1081344 bytes)
+Cost:                           $52.80
+
+
+ CACHE SIMULATION RESULTS  
+
+Total Cache Accesses:   366344  (350466 addresses)
+Cache Hits:             361496
+Cache Misses:           4848
+--- Compulsory Misses:     4824
+--- Conflict Misses:       24
+
+
+   CACHE HIT & MISS RATE:   
+
+Hit  Rate:              98.6767%
+Miss Rate:              1.3233%
+CPI:                    4.63 Cycles/Instruction  (260322)
+Unused Cache Space:     745.08 KB / 1056.00 KB = 70.56%  Waste: $37.25
+Unused Cache Blocks:    11560 / 16384
