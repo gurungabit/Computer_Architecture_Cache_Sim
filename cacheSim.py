@@ -174,3 +174,7 @@ Simulation()
 print("Hit", hit)
 print("ConflictMiss", conflictMiss)
 print("compulsoryMiss", compulsoryMiss)
+
+
+#Few things I discovered
+# 1. Compulsory miss should only be incremented if the tag did not match, in our code, we are incrementing the compulsory miss for every index we miss.
