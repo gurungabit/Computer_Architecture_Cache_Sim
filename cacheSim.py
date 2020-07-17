@@ -1,5 +1,18 @@
 import sys
 import math
+
+
+class indexBlock:
+    index = None
+    HM = None
+    count = 0
+
+    def __init__(self, index, HM, count):
+        self.index = index
+        self.HM = HM
+        self.count = count
+
+
 if len(sys.argv) < 9:
     print(
         "Usage", sys.argv[0], "–f <trace file name> –s <cache size in KB> –b <block size> –a <associativity> –r <replacement policy>")
@@ -53,59 +66,111 @@ print("Implementation Memory Size: \t {:.2f} KB ({:.2f} bytes)".format(
     impMemorySize, impMemorySizeBytes))
 print('Cost: \t\t\t\t ${:.2f}'.format(cost))
 print()
+cache = {}
+compulsoryMiss = 0
+hit = 0
+conflictMiss = 0
+LRUCount = 0
 
 
-def readFirstTwenty():
+def getAttributes(address, offsetBits, cacheIndexBits, tagSize):
+    offset = address[-1]
+    indx = int(cacheIndexBits / 4)
+    index = address[-indx-1:-1]
+    tag = address[0:-4]
+    return(tag, index, offset)
+
+
+def performCache(bytesToRead, address):
+    global LRUCount
+    global compulsoryMiss
+    global hit
+    global conflictMiss
+    newAddress = int(address, 16) + int(bytesToRead, 16)
+    newTag, newIndex, newOffset = getAttributes(
+        hex(newAddress), offsetBits, cacheIndexBits, tagSize)
+    tag, index, offset = getAttributes(
+        address, offsetBits, cacheIndexBits, tagSize)
+    node = indexBlock(index, 'HM', LRUCount)
+    LRUCount += 1
+    if not cache:
+        cache[tag] = [node]
+        compulsoryMiss += 1
+        return
+    if tag not in cache:
+        cache[tag] = [node]
+        compulsoryMiss += 1
+    else:
+        for indexItem in cache[tag]:
+            if indexItem.index == index:
+                indexItem.count = LRUCount
+                hit += 1
+                return
+        if len(cache[tag]) < associativity:
+            cache[tag].append(node)
+            compulsoryMiss += 1
+        else:
+            # replacement
+            cache[tag].sort(key=lambda x: x.count)
+            cache[tag].pop(0)
+            conflictMiss += 1
+            cache[tag].append(node)
+    if newIndex != index:
+        node = indexBlock(newIndex, 'HM', LRUCount)
+        LRUCount += 1
+        if not cache:
+            cache[tag] = [node]
+            compulsoryMiss += 1
+            return
+        if tag not in cache:
+            cache[tag] = [node]
+            compulsoryMiss += 1
+        else:
+            for indexItem in cache[tag]:
+                if indexItem.index == index:
+                    indexItem.count = LRUCount
+                    hit += 1
+                    return
+            if len(cache[tag]) < associativity:
+                cache[tag].append(node)
+                compulsoryMiss += 1
+            else:
+                # replacement
+                cache[newTag].sort(key=lambda x: x.count)
+                cache[newTag].pop(0)
+                conflictMiss += 1
+                cache[newTag].append(node)
+
+
+def Simulation():
     try:
         with open(traceFile) as f:
             lines = f.readlines()
-            count = 0
-            length = 0
+            numOfAddresses = 0
+            bytesToRead = 0
             for line in lines:
-                if count >= 20:
-                    break
                 if line == '\n':
                     continue
                 item = line.strip().split()
                 if item[0] == 'dstM:':
                     if item[1] != "00000000":
-                        print(hex(int(item[1], 16)),
-                              "({:s})" .format(length))
-                        count += 1
+                        address = item[1]
+                        performCache(bytesToRead, address)
                     if item[4] != "00000000":
-                        print(hex(int(item[4], 16)),
-                              "({:s})" .format(length))
-                        count += 1
+                        address = item[4]
+                        performCache(bytesToRead, address)
                 else:
-                    length = item[1][1:3]
-                    print(hex(int(item[2], 16)),
-                          "({:s})" .format(length))
-                    count += 1
-                # hexNum = int(item[2], 16)
-                # num2 = int(item[2], 16)
-                # sum = hexNum + num2
-                # print(hex(sum))
+                    bytesToRead = item[1][1:3]
+                    address = item[2]
+                    performCache(bytesToRead, address)
+
     except FileNotFoundError:
         print("File not found or no file was given!")
         pass
 
 
-readFirstTwenty()
+Simulation()
 
-
-# def Simuation():
-#     with open(traceFile) as f:
-#         lines = f.readlines()
-#         for index, line in enumerate(lines):
-#             if line == '\n':
-#                 continue
-#             item = line.strip().split()
-#             if item[0] == "dstM:":
-#                 if item[1] == "00000000" and item[4] == "00000000":
-#                     continue
-#                 else:
-#                     print(lines[index-1])
-#                     print(line)
-
-
-# Simuation()
+print("Hit", hit)
+print("ConflictMiss", conflictMiss)
+print("compulsoryMiss", compulsoryMiss)

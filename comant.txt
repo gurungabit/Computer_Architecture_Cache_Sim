@@ -1,1 +1,5 @@
 python cacheSim.py -f Trace1.trc -s 512 -b 16 -a 8 -r RR
+
+
+
+python Random.py -f Usethisfile.trc -s 1024 -b 64 -a 8 -r RR
