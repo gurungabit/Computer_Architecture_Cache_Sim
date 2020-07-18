@@ -53,9 +53,13 @@ tagSize = addressSpaceBits - cacheIndexBits - offsetBits
 totalNumRows = pow(2, cacheIndexBits)  # also can be called number of sets
 # int((cacheSize*pow(2,10))/blockSize)
 totalNumBlocks = totalNumRows * associativity
-overHead = pow(2, tagSize) + totalNumRows
+# ASK PROFFESSOR ABOUT THIS
+# overHead = pow(2, tagSize) + totalNumRows
+overHead = pow(2, tagSize)
 impMemorySize = cacheSize + overHead / pow(2, 10)
 impMemorySizeBytes = impMemorySize * pow(2, 10)
+
+# USE COST 0.05 to match output cost
 cost = impMemorySize * 0.07
 print("\n", "*"*5, "Cache Calculated Values", "*"*5, "\n")
 print("Total Blocks:", "\t\t\t", totalNumBlocks)
@@ -67,12 +71,6 @@ print("Implementation Memory Size: \t {:.2f} KB ({:.2f} bytes)".format(
     impMemorySize, impMemorySizeBytes))
 print('Cost: \t\t\t\t ${:.2f}'.format(cost))
 print()
-cache = {}
-compulsoryMiss = 0
-hit = 0
-conflictMiss = 0
-LRUCount = 0
-cacheMiss = 0
 
 
 def getAttributes(address, offsetBits, cacheIndexBits, tagSize):
@@ -86,15 +84,15 @@ def getAttributes(address, offsetBits, cacheIndexBits, tagSize):
     return tag, index, offset
 
 
-cacheAccessCnt = 0
-
-
 def performCache(bytesToRead, address):
     global compulsoryMiss
     global hit
     global conflictMiss
     global cacheAccessCnt
     global cacheMiss
+    global cycles
+
+    miss_penalty = 4 * math.ceil(blockSize / 4)
 
     indexes = []
 
@@ -104,7 +102,7 @@ def performCache(bytesToRead, address):
     indexes.append(index)
 
     newAddress = int(address, 16)
-    for i in range(int(bytesToRead)):
+    for i in range(int(bytesToRead) - 1):
         newAddress = newAddress + 1
 
         newTag, newIndex, newOffset = getAttributes(
@@ -123,15 +121,25 @@ def performCache(bytesToRead, address):
         if not cache:
             cache[index] = [node]
             compulsoryMiss += 1
+            cycles += miss_penalty
             continue
         if index not in cache:
             cache[index] = [node]
             compulsoryMiss += 1
+            cycles += miss_penalty
         else:
+            found = False
             for blockTag in cache[index]:
                 if blockTag.tag == tag:
                     hit += 1
-                    continue
+                    cycles += 1
+                    found = True
+                    break
+            if found:
+                continue
+
+            cycles += miss_penalty
+
             if len(cache[index]) < associativity:
                 cache[index].append(node)
                 compulsoryMiss += 1
@@ -144,6 +152,10 @@ def performCache(bytesToRead, address):
 
 
 def Simulation():
+
+    global instructionCount
+    global cycles
+
     try:
         with open(traceFile) as f:
             lines = f.readlines()
@@ -155,16 +167,18 @@ def Simulation():
                 item = line.strip().split()
                 if item[0] == 'dstM:':
                     if item[1] != "00000000":
-                        address = item[1]
                         numOfAddresses += 1
-                        performCache("4", address)
+                        cycles += 1
+                        performCache(4, item[1])
                     if item[4] != "00000000":
                         numOfAddresses += 1
-                        address = item[4]
-                        performCache("4", address)
+                        cycles += 1
+                        performCache(4, item[4])
                 else:
                     bytesToRead = item[1][1:3]
                     numOfAddresses += 1
+                    instructionCount += 1
+                    cycles += 2
                     address = item[2]
                     performCache(bytesToRead, address)
             print(numOfAddresses)
@@ -173,9 +187,24 @@ def Simulation():
         pass
 
 
+cache = {}
+compulsoryMiss = 0
+hit = 0
+conflictMiss = 0
+LRUCount = 0
+cacheMiss = 0
+cacheAccessCnt = 0
+instructionCount = 0
+cycles = 0
+
 Simulation()
 
 print("Cache Accesses", cacheAccessCnt)
 print("Hit", hit)
 print("ConflictMiss", conflictMiss)
 print("compulsoryMiss", compulsoryMiss)
+hit_rate = (float(hit) / cacheAccessCnt) * 100
+print("Hit Rate: {:.4f}%".format(hit_rate))
+print("Miss Rate: {:.4f}%".format(100 - hit_rate))
+print("CPI: {:.2f}".format(float(cycles)/instructionCount))
+print(cycles, instructionCount)
