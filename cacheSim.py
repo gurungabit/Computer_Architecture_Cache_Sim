@@ -2,6 +2,7 @@ import sys
 import math
 
 
+# this class should have valid bits (0,1) and tag. We can name it BLock for readability.
 class indexBlock:
     index = None
     HM = None
@@ -94,14 +95,24 @@ def performCache(bytesToRead, address):
     node = indexBlock(index, 'HM', LRUCount)
     LRUCount += 1
     if not cache:
+        # Instead of cache[tag], it will be cache[index]
+        # Compulsory miss and set the valid bit to 1
         cache[tag] = [node]
         compulsoryMiss += 1
         return
+    
+    # instead it will be if index not in cache
     if tag not in cache:
+        # change cache[tag] to cache[index]
         cache[tag] = [node]
         compulsoryMiss += 1
     else:
+        # Change cache[tag] to cache[index]
         for indexItem in cache[tag]:
+            
+            # Instead of indexItem.index, it will be indexItem.tag
+            
+            # Change to if indexItem.tag== tag:
             if indexItem.index == index:
                 indexItem.count = LRUCount
                 hit += 1
