@@ -76,9 +76,10 @@ cacheMiss = 0
 
 
 def getAttributes(address, offsetBits, cacheIndexBits, tagSize):
-    binary = bin(int(address, 16))
+
+    binary = bin(address)
     if len(binary[2:]) < addressSpaceBits:
-        binary = format(int(binary, 2), '#032b')
+        binary = format(int(binary, 2), '032b')
     offset = hex(int(binary[-offsetBits:], 2))
     index = hex(int(binary[-cacheIndexBits + -offsetBits:-offsetBits], 2))
     tag = hex(int(binary[:-cacheIndexBits + -offsetBits], 2))
@@ -94,50 +95,52 @@ def performCache(bytesToRead, address):
     global conflictMiss
     global cacheAccessCnt
     global cacheMiss
+
+    indexes = []
+
     tag, index, offset = getAttributes(
-        address, offsetBits, cacheIndexBits, tagSize)
-    newAddress = int(address, 16) + int(bytesToRead, 16)
-    newTag, newIndex, newOffset = getAttributes(
-        hex(newAddress), offsetBits, cacheIndexBits, tagSize)
+        int(address, 16), offsetBits, cacheIndexBits, tagSize)
+
+    indexes.append(index)
+
+    newAddress = int(address, 16)
+    for i in range(int(bytesToRead)):
+        newAddress = newAddress + 1
+
+        newTag, newIndex, newOffset = getAttributes(
+            newAddress, offsetBits, cacheIndexBits, tagSize)
+
+        if indexes[-1] != newIndex:
+            indexes.append(newIndex)
+
     node = indexBlock(tag, 'HM', LRUCount)
-    if not cache:
+
+    for i in range(len(indexes)):
+
+        index = indexes[i]
         cacheAccessCnt += 1
-        cache[index] = [node]
-        compulsoryMiss += 1
-        return
-    if index not in cache:
-        cacheAccessCnt += 1
-        cache[index] = [node]
-        compulsoryMiss += 1
-    else:
-        cacheAccessCnt += 1
-        for blockTag in cache[index]:
-            if blockTag.tag == tag:
-                hit += 1
-                return
-        if len(cache[index]) < associativity:
-            cache[index].append(node)
+
+        if not cache:
+            cache[index] = [node]
+            compulsoryMiss += 1
+            continue
+        if index not in cache:
+            cache[index] = [node]
             compulsoryMiss += 1
         else:
-            # replacement
-            i = random.randint(0, len(cache[index])-1)
-            cache[index].pop(i)
-            conflictMiss += 1
-            cache[index].append(node)
-    node = indexBlock(newTag, 'HM', LRUCount)
-    if newIndex != index:
-        cacheAccessCnt += 1
-        if newIndex in cache:
-            for blockTag in cache[newIndex]:
-                if newTag == blockTag.tag:
+            for blockTag in cache[index]:
+                if blockTag.tag == tag:
                     hit += 1
-                    return
+                    continue
             if len(cache[index]) < associativity:
-                cache[newIndex].append(node)
+                cache[index].append(node)
                 compulsoryMiss += 1
-        else:
-            cache[newIndex] = [node]
-            compulsoryMiss += 1
+            else:
+                # replacement
+                i = random.randint(0, len(cache[index])-1)
+                cache[index].pop(i)
+                conflictMiss += 1
+                cache[index].append(node)
 
 
 def Simulation():
@@ -154,11 +157,11 @@ def Simulation():
                     if item[1] != "00000000":
                         address = item[1]
                         numOfAddresses += 1
-                        performCache(bytesToRead, address)
+                        performCache("4", address)
                     if item[4] != "00000000":
                         numOfAddresses += 1
                         address = item[4]
-                        performCache(bytesToRead, address)
+                        performCache("4", address)
                 else:
                     bytesToRead = item[1][1:3]
                     numOfAddresses += 1
