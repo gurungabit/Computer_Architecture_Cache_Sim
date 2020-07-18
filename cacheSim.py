@@ -100,7 +100,7 @@ def performCache(bytesToRead, address):
         cache[tag] = [node]
         compulsoryMiss += 1
         return
-    
+
     # instead it will be if index not in cache
     if tag not in cache:
         # change cache[tag] to cache[index]
@@ -109,9 +109,9 @@ def performCache(bytesToRead, address):
     else:
         # Change cache[tag] to cache[index]
         for indexItem in cache[tag]:
-            
+
             # Instead of indexItem.index, it will be indexItem.tag
-            
+
             # Change to if indexItem.tag== tag:
             if indexItem.index == index:
                 indexItem.count = LRUCount
@@ -187,5 +187,5 @@ print("ConflictMiss", conflictMiss)
 print("compulsoryMiss", compulsoryMiss)
 
 
-#Few things I discovered
+# Few things I discovered
 # 1. Compulsory miss should only be incremented if the tag did not match, in our code, we are incrementing the compulsory miss for every index we miss.

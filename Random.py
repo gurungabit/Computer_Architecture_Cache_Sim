@@ -4,12 +4,12 @@ import random
 
 
 class indexBlock:
-    index = None
+    tag = None
     HM = None
     count = 0
 
-    def __init__(self, index, HM, count):
-        self.index = index
+    def __init__(self, tag, HM, count):
+        self.tag = tag
         self.HM = HM
         self.count = count
 
@@ -72,6 +72,7 @@ compulsoryMiss = 0
 hit = 0
 conflictMiss = 0
 LRUCount = 0
+cacheMiss = 0
 
 
 def getAttributes(address, offsetBits, cacheIndexBits, tagSize):
@@ -84,61 +85,59 @@ def getAttributes(address, offsetBits, cacheIndexBits, tagSize):
     return tag, index, offset
 
 
-accessCacheCnt = 0
+cacheAccessCnt = 0
 
 
 def performCache(bytesToRead, address):
-    global LRUCount
     global compulsoryMiss
     global hit
     global conflictMiss
-    global accessCacheCnt
+    global cacheAccessCnt
+    global cacheMiss
+    tag, index, offset = getAttributes(
+        address, offsetBits, cacheIndexBits, tagSize)
     newAddress = int(address, 16) + int(bytesToRead, 16)
     newTag, newIndex, newOffset = getAttributes(
         hex(newAddress), offsetBits, cacheIndexBits, tagSize)
-    tag, index, offset = getAttributes(
-        address, offsetBits, cacheIndexBits, tagSize)
-    node = indexBlock(index, 'HM', LRUCount)
-    LRUCount += 1
+    node = indexBlock(tag, 'HM', LRUCount)
     if not cache:
-        accessCacheCnt += 1
-        cache[tag] = [node]
+        cacheAccessCnt += 1
+        cache[index] = [node]
         compulsoryMiss += 1
         return
-    if tag not in cache:
-        accessCacheCnt += 1
-        cache[tag] = [node]
+    if index not in cache:
+        cacheAccessCnt += 1
+        cache[index] = [node]
         compulsoryMiss += 1
     else:
-        for indexItem in cache[tag]:
-            if indexItem.index == index:
-                accessCacheCnt += 1
-                indexItem.count = LRUCount
+        cacheAccessCnt += 1
+        for blockTag in cache[index]:
+            if blockTag.tag == tag:
                 hit += 1
                 return
-        if len(cache[tag]) < associativity:
-            accessCacheCnt += 1
-            cache[tag].append(node)
+        if len(cache[index]) < associativity:
+            cache[index].append(node)
             compulsoryMiss += 1
         else:
             # replacement
-            i = random.randint(0, len(cache[tag])-1)
-            cache[tag].pop(i)
+            i = random.randint(0, len(cache[index])-1)
+            cache[index].pop(i)
             conflictMiss += 1
-            accessCacheCnt += 1
-            cache[tag].append(node)
+            cache[index].append(node)
+    node = indexBlock(newTag, 'HM', LRUCount)
     if newIndex != index:
-        node = indexBlock(newIndex, 'HM', LRUCount)
-        if len(cache[tag]) < associativity:
-            accessCacheCnt += 1
-            cache[tag].append(node)
-            compulsoryMiss += 1
+        cacheAccessCnt += 1
+        if newIndex in cache:
+            for blockTag in cache[newIndex]:
+                if newTag == blockTag.tag:
+                    hit += 1
+                    return
+            if len(cache[index]) < associativity:
+                cache[newIndex].append(node)
+                compulsoryMiss += 1
         else:
-            i = random.randint(0, len(cache[tag])-1)
-            cache[tag].pop(i)
-            conflictMiss += 1
-            accessCacheCnt += 1
-            cache[tag].append(node)
+            cache[newIndex] = [node]
+            compulsoryMiss += 1
 
 
 def Simulation():
@@ -173,7 +172,7 @@ def Simulation():
 
 Simulation()
 
-print("Cache Accesses", accessCacheCnt)
+print("Cache Accesses", cacheAccessCnt)
 print("Hit", hit)
 print("ConflictMiss", conflictMiss)
 print("compulsoryMiss", compulsoryMiss)
