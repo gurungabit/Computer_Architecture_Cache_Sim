@@ -1,17 +1,13 @@
 import sys
 import math
+import random
 
 
-# this class should have valid bits (0,1) and tag. We can name it BLock for readability.
 class indexBlock:
-    index = None
-    HM = None
-    count = 0
+    tag = None
 
-    def __init__(self, index, HM, count):
-        self.index = index
-        self.HM = HM
-        self.count = count
+    def __init__(self, tag):
+        self.tag = tag
 
 
 if len(sys.argv) < 9:
@@ -23,6 +19,7 @@ cacheSize = None
 blockSize = None
 associativity = None
 replacementPolicy = None
+costPerBit = 0.07
 for index, item in enumerate(sys.argv):
     if item == '-f':
         traceFile = sys.argv[index+1]
@@ -34,6 +31,9 @@ for index, item in enumerate(sys.argv):
         associativity = int(sys.argv[index+1])
     elif item == '-r':
         replacementPolicy = sys.argv[index+1]
+        if replacementPolicy != 'RND' and replacementPolicy != 'RR':
+            print('Replacement policy must be RND or RR')
+            exit(1)
     else:
         continue
 print("Cache Simulator - CS 3853 Summer 2020 - Group 7")
@@ -42,7 +42,8 @@ print("*"*5, "Cache Input Parameters", "*"*5)
 print("Cache Size:", "\t\t\t", cacheSize, "KB")
 print("Block Size:", "\t\t\t", blockSize, "bytes")
 print("Associativity:", "\t\t\t", associativity)
-print("Replacement Policy:", "\t\t", replacementPolicy)
+print("Replacement Policy:", "\t\t",
+      'Random' if replacementPolicy == 'RND' else 'Round Robin')
 
 associativityBits = int(math.log(associativity, 2))
 accessBits = int(math.log(cacheSize, 2) + 10)
@@ -53,10 +54,13 @@ tagSize = addressSpaceBits - cacheIndexBits - offsetBits
 totalNumRows = pow(2, cacheIndexBits)  # also can be called number of sets
 # int((cacheSize*pow(2,10))/blockSize)
 totalNumBlocks = totalNumRows * associativity
-overHead = pow(2, tagSize) + totalNumRows
+overHead = int((totalNumRows * associativity) * (tagSize / 8) +
+               (totalNumRows * associativity / 8))
 impMemorySize = cacheSize + overHead / pow(2, 10)
 impMemorySizeBytes = impMemorySize * pow(2, 10)
-cost = impMemorySize * 0.07
+
+# USE COST 0.05 to match output cost
+cost = impMemorySize * costPerBit
 print("\n", "*"*5, "Cache Calculated Values", "*"*5, "\n")
 print("Total Blocks:", "\t\t\t", totalNumBlocks)
 print("Tag Size:", "\t\t\t", tagSize, "bits")
@@ -67,93 +71,96 @@ print("Implementation Memory Size: \t {:.2f} KB ({:.2f} bytes)".format(
     impMemorySize, impMemorySizeBytes))
 print('Cost: \t\t\t\t ${:.2f}'.format(cost))
 print()
-cache = {}
-compulsoryMiss = 0
-hit = 0
-conflictMiss = 0
-LRUCount = 0
 
 
 def getAttributes(address, offsetBits, cacheIndexBits, tagSize):
-    offset = address[-1]
-    indx = int(cacheIndexBits / 4)
-    index = address[-indx-1:-1]
-    tag = address[0:-4]
-    return(tag, index, offset)
+
+    binary = bin(address)
+    if len(binary[2:]) < addressSpaceBits:
+        binary = format(int(binary, 2), '032b')
+    offset = hex(int(binary[-offsetBits:], 2))
+    index = hex(int(binary[-cacheIndexBits + -offsetBits:-offsetBits], 2))
+    tag = hex(int(binary[:-cacheIndexBits + -offsetBits], 2))
+    return tag, index, offset
 
 
 def performCache(bytesToRead, address):
-    global LRUCount
     global compulsoryMiss
     global hit
     global conflictMiss
-    newAddress = int(address, 16) + int(bytesToRead, 16)
-    newTag, newIndex, newOffset = getAttributes(
-        hex(newAddress), offsetBits, cacheIndexBits, tagSize)
+    global cacheAccessCnt
+    global cacheMiss
+    global cycles
+    global robin_index
+
+    miss_penalty = 4 * math.ceil(blockSize / 4)
+
+    indexes = []
+
     tag, index, offset = getAttributes(
-        address, offsetBits, cacheIndexBits, tagSize)
-    node = indexBlock(index, 'HM', LRUCount)
-    LRUCount += 1
-    if not cache:
-        # Instead of cache[tag], it will be cache[index]
-        # Compulsory miss and set the valid bit to 1
-        cache[tag] = [node]
-        compulsoryMiss += 1
-        return
+        int(address, 16), offsetBits, cacheIndexBits, tagSize)
 
-    # instead it will be if index not in cache
-    if tag not in cache:
-        # change cache[tag] to cache[index]
-        cache[tag] = [node]
-        compulsoryMiss += 1
-    else:
-        # Change cache[tag] to cache[index]
-        for indexItem in cache[tag]:
+    indexes.append(index)
 
-            # Instead of indexItem.index, it will be indexItem.tag
+    newAddress = int(address, 16)
+    for i in range(int(bytesToRead) - 1):
+        newAddress = newAddress + 1
 
-            # Change to if indexItem.tag== tag:
-            if indexItem.index == index:
-                indexItem.count = LRUCount
-                hit += 1
-                return
-        if len(cache[tag]) < associativity:
-            cache[tag].append(node)
-            compulsoryMiss += 1
-        else:
-            # replacement
-            cache[tag].sort(key=lambda x: x.count)
-            cache[tag].pop(0)
-            conflictMiss += 1
-            cache[tag].append(node)
-    if newIndex != index:
-        node = indexBlock(newIndex, 'HM', LRUCount)
-        LRUCount += 1
+        newTag, newIndex, newOffset = getAttributes(
+            newAddress, offsetBits, cacheIndexBits, tagSize)
+
+        if indexes[-1] != newIndex:
+            indexes.append(newIndex)
+
+    node = indexBlock(tag)
+
+    for i in range(len(indexes)):
+
+        index = indexes[i]
+        cacheAccessCnt += 1
+
         if not cache:
-            cache[tag] = [node]
+            cache[index] = [[node], 0]
             compulsoryMiss += 1
-            return
-        if tag not in cache:
-            cache[tag] = [node]
+            cycles += miss_penalty
+            continue
+        if index not in cache:
+            cache[index] = [[node], 0]
             compulsoryMiss += 1
+            cycles += miss_penalty
         else:
-            for indexItem in cache[tag]:
-                if indexItem.index == index:
-                    indexItem.count = LRUCount
+            found = False
+            for blockTag in cache[index][0]:
+                if blockTag.tag == tag:
                     hit += 1
-                    return
-            if len(cache[tag]) < associativity:
-                cache[tag].append(node)
+                    cycles += 1
+                    found = True
+                    break
+            if found:
+                continue
+
+            cycles += miss_penalty
+
+            if len(cache[index][0]) < associativity:
+                cache[index][0].append(node)
                 compulsoryMiss += 1
             else:
                 # replacement
-                cache[newTag].sort(key=lambda x: x.count)
-                cache[newTag].pop(0)
+                if replacementPolicy == 'RR':
+                    i = cache[index][1]
+                    cache[index][1] = (cache[index][1] + 1) % associativity
+                elif replacementPolicy == 'RND':
+                    i = random.randint(0, len(cache[index][0])-1)
+
+                cache[index][0][i] = node
                 conflictMiss += 1
-                cache[newTag].append(node)
 
 
 def Simulation():
+
+    global instructionCount
+    global cycles
+
     try:
         with open(traceFile) as f:
             lines = f.readlines()
@@ -165,27 +172,60 @@ def Simulation():
                 item = line.strip().split()
                 if item[0] == 'dstM:':
                     if item[1] != "00000000":
-                        address = item[1]
-                        performCache(bytesToRead, address)
+                        numOfAddresses += 1
+                        cycles += 1
+                        performCache(4, item[1])
                     if item[4] != "00000000":
-                        address = item[4]
-                        performCache(bytesToRead, address)
+                        numOfAddresses += 1
+                        cycles += 1
+                        performCache(4, item[4])
                 else:
                     bytesToRead = item[1][1:3]
+                    numOfAddresses += 1
+                    instructionCount += 1
+                    cycles += 2
                     address = item[2]
                     performCache(bytesToRead, address)
-
+            return numOfAddresses
     except FileNotFoundError:
         print("File not found or no file was given!")
         pass
 
 
-Simulation()
+cache = {}
+compulsoryMiss = 0
+hit = 0
+conflictMiss = 0
+LRUCount = 0
+cacheMiss = 0
+cacheAccessCnt = 0
+instructionCount = 0
+cycles = 0
 
-print("Hit", hit)
-print("ConflictMiss", conflictMiss)
-print("compulsoryMiss", compulsoryMiss)
 
+robin_index = 0
+numOfAddresses = Simulation()
 
-# Few things I discovered
-# 1. Compulsory miss should only be incremented if the tag did not match, in our code, we are incrementing the compulsory miss for every index we miss.
+print("\n CACHE SIMULATION RESULTS\n")
+print("Total Cache Accesses: \t {:d} ({:d} addresses)".format(
+    cacheAccessCnt, numOfAddresses))
+print("Cache Hits:\t\t", hit)
+print("Cache Misses:\t\t", compulsoryMiss + conflictMiss)
+print("--- Compulsory Misses:\t", compulsoryMiss)
+print("--- Conflict Misses:\t", conflictMiss)
+print("\n\n   CACHE HIT & MISS RATE:\n")
+hit_rate = (float(hit) / cacheAccessCnt) * 100
+print("Hit Rate: \t\t{:.4f}%".format(hit_rate))
+print("Miss Rate: \t\t{:.4f}%".format(100 - hit_rate))
+CPI = float(cycles / instructionCount)
+print("CPI: \t\t\t{:.2f} Cycles/Instruction  ({:d})".format(
+    CPI, instructionCount))
+
+used_space = (compulsoryMiss * (blockSize + (tagSize + 1) / 8)) / 1024
+unused_space = impMemorySize - used_space
+percent_unused = (unused_space / impMemorySize) * 100.0
+waste = unused_space * costPerBit
+print('Unused Cache Space:\t{:.2f} KB / {:.2f} KB = {:.2f}% Waste: ${:.2f}'.format(
+    unused_space, impMemorySize, percent_unused, waste))
+print('Unused Cache Blocks:\t{:d} / {:d}'.format(
+    totalNumBlocks - compulsoryMiss, totalNumBlocks))
