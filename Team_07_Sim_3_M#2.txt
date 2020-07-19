@@ -1,0 +1,37 @@
+Cache Simulator - CS 3853 Summer 2020 - Group 7
+
+Trace File: A-9_new_1.5.pdf.trc 
+
+***** Cache Input Parameters *****
+Cache Size: 			 1024 KB
+Block Size: 			 16 bytes
+Associativity: 			 16
+Replacement Policy: 		 Round Robin
+
+ ***** Cache Calculated Values ***** 
+
+Total Blocks: 			 65536
+Tag Size: 			 16 bits
+Index Size: 			 12 bits
+Total # Rows: 			 4096
+Overhead size: 			 139264 bytes
+Implementation Memory Size: 	 1160.00 KB (1187840.00 bytes)
+Cost: 				 $81.20
+
+
+ CACHE SIMULATION RESULTS
+
+Total Cache Accesses: 	 387850 (350466 addresses)
+Cache Hits:		 375155
+Cache Misses:		 12695
+--- Compulsory Misses:	 12678
+--- Conflict Misses:	 17
+
+
+   CACHE HIT & MISS RATE:
+
+Hit Rate: 		96.7268%
+Miss Rate: 		3.2732%
+CPI: 			4.57 Cycles/Instruction  (260322)
+Unused Cache Space:	935.60 KB / 1160.00 KB = 80.65% Waste: $65.49
+Unused Cache Blocks:	52858 / 65536
