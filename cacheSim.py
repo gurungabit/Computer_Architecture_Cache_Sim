@@ -36,14 +36,14 @@ for index, item in enumerate(sys.argv):
             exit(1)
     else:
         continue
-print("Cache Simulator - CS 3853 Summer 2020 - Group 7")
-print("\nTrace File:", traceFile, "\n")
-print("*"*5, "Cache Input Parameters", "*"*5)
-print("Cache Size:", "\t\t\t", cacheSize, "KB")
-print("Block Size:", "\t\t\t", blockSize, "bytes")
-print("Associativity:", "\t\t\t", associativity)
-print("Replacement Policy:", "\t\t",
-      'Random' if replacementPolicy == 'RND' else 'Round Robin')
+# print("Cache Simulator - CS 3853 Summer 2020 - Group 7")
+# print("\nTrace File:", traceFile, "\n")
+# print("*"*5, "Cache Input Parameters", "*"*5)
+# print("Cache Size:", "\t\t\t", cacheSize, "KB")
+# print("Block Size:", "\t\t\t", blockSize, "bytes")
+# print("Associativity:", "\t\t\t", associativity)
+# print("Replacement Policy:", "\t\t",
+#       'Random' if replacementPolicy == 'RND' else 'Round Robin')
 
 associativityBits = int(math.log(associativity, 2))
 accessBits = int(math.log(cacheSize, 2) + 10)
@@ -61,16 +61,16 @@ impMemorySizeBytes = impMemorySize * pow(2, 10)
 
 # USE COST 0.05 to match output cost
 cost = impMemorySize * costPerBit
-print("\n", "*"*5, "Cache Calculated Values", "*"*5, "\n")
-print("Total Blocks:", "\t\t\t", totalNumBlocks)
-print("Tag Size:", "\t\t\t", tagSize, "bits")
-print("Index Size:", "\t\t\t", cacheIndexBits, "bits")
-print("Total # Rows:", "\t\t\t", totalNumRows)
-print("Overhead size:", "\t\t\t", overHead, "bytes")
-print("Implementation Memory Size: \t {:.2f} KB ({:.2f} bytes)".format(
-    impMemorySize, impMemorySizeBytes))
-print('Cost: \t\t\t\t ${:.2f}'.format(cost))
-print()
+# print("\n", "*"*5, "Cache Calculated Values", "*"*5, "\n")
+# print("Total Blocks:", "\t\t\t", totalNumBlocks)
+# print("Tag Size:", "\t\t\t", tagSize, "bits")
+# print("Index Size:", "\t\t\t", cacheIndexBits, "bits")
+# print("Total # Rows:", "\t\t\t", totalNumRows)
+# print("Overhead size:", "\t\t\t", overHead, "bytes")
+# print("Implementation Memory Size: \t {:.2f} KB ({:.2f} bytes)".format(
+#     impMemorySize, impMemorySizeBytes))
+# print('Cost: \t\t\t\t ${:.2f}'.format(cost))
+# print()
 
 
 def getAttributes(address, offsetBits, cacheIndexBits, tagSize):
@@ -206,31 +206,34 @@ cycles = 0
 robin_index = 0
 numOfAddresses = Simulation()
 
-print("\n CACHE SIMULATION RESULTS\n")
-print("Total Cache Accesses: \t {:d} ({:d} addresses)".format(
-    cacheAccessCnt, numOfAddresses))
-print("Cache Hits:\t\t", hit)
-print("Cache Misses:\t\t", compulsoryMiss + conflictMiss)
-print("--- Compulsory Misses:\t", compulsoryMiss)
-print("--- Conflict Misses:\t", conflictMiss)
-print("\n\n   CACHE HIT & MISS RATE:\n")
+# print("\n CACHE SIMULATION RESULTS\n")
+# print("Total Cache Accesses: \t {:d} ({:d} addresses)".format(
+#     cacheAccessCnt, numOfAddresses))
+# print("Cache Hits:\t\t", hit)
+# print("Cache Misses:\t\t", compulsoryMiss + conflictMiss)
+# print("--- Compulsory Misses:\t", compulsoryMiss)
+# print("--- Conflict Misses:\t", conflictMiss)
+# print("\n\n   CACHE HIT & MISS RATE:\n")
 hit_rate = (float(hit) / cacheAccessCnt) * 100
-print("Hit Rate: \t\t{:.4f}%".format(hit_rate))
-print("Miss Rate: \t\t{:.4f}%".format(100 - hit_rate))
+# print("Hit Rate: \t\t{:.4f}%".format(hit_rate))
+# print("Miss Rate: \t\t{:.4f}%".format(100 - hit_rate))
 CPI = float(cycles / instructionCount)
-print("CPI: \t\t\t{:.2f} Cycles/Instruction  ({:d})".format(
-    CPI, instructionCount))
+# print("CPI: \t\t\t{:.2f} Cycles/Instruction  ({:d})".format(
+#     CPI, instructionCount))
 
 used_space = (compulsoryMiss * (blockSize + (tagSize + 1) / 8)) / 1024
 unused_space = impMemorySize - used_space
 percent_unused = (unused_space / impMemorySize) * 100.0
 waste = unused_space * costPerBit
-print('Unused Cache Space:\t{:.2f} KB / {:.2f} KB = {:.2f}% Waste: ${:.2f}'.format(
-    unused_space, impMemorySize, percent_unused, waste))
-print('Unused Cache Blocks:\t{:d} / {:d}'.format(
-    totalNumBlocks - compulsoryMiss, totalNumBlocks))
+# print('Unused Cache Space:\t{:.2f} KB / {:.2f} KB = {:.2f}% Waste: ${:.2f}'.format(
+#     unused_space, impMemorySize, percent_unused, waste))
+# print('Unused Cache Blocks:\t{:d} / {:d}'.format(
+#     totalNumBlocks - compulsoryMiss, totalNumBlocks))
 
 
 with open('out.csv', 'a') as f:
-    this = '\n'+str(cacheSize)+','+str(blockSize)+','+str(associativity)+','+str(replacementPolicy)+','+str(totalNumBlocks)+','+str(tagSize)+','+str(cacheIndexBits)+','+str(totalNumRows)+','+str(overHead)+','+str(impMemorySize)+','+str(cost)+','+str(cacheAccessCnt)+','+str(hit)+','+str(compulsoryMiss+conflictMiss)+','+str(compulsoryMiss)+','+str(conflictMiss)+','+str(hit_rate)+','+str(100-hit_rate)+','+str(CPI)+','+str(percent_unused)+','+str(totalNumBlocks-compulsoryMiss)+','+str(waste)
+    this = '\n'+str(cacheSize)+','+str(blockSize)+','+str(associativity)+','+str(replacementPolicy)+','+str(totalNumBlocks)+','+str(tagSize)+','+str(cacheIndexBits)+','+str(totalNumRows)+','+str(overHead)+','+str(impMemorySize)+','+str(cost)+',' + \
+        str(cacheAccessCnt)+','+str(hit)+','+str(compulsoryMiss+conflictMiss)+','+str(compulsoryMiss)+','+str(conflictMiss)+',' + \
+        str(hit_rate)+','+str(100-hit_rate)+','+str(CPI)+',' + \
+        str(percent_unused)+','+str(totalNumBlocks-compulsoryMiss)+','+str(waste)
     f.write(this)
