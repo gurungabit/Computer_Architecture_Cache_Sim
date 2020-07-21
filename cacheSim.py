@@ -229,3 +229,8 @@ print('Unused Cache Space:\t{:.2f} KB / {:.2f} KB = {:.2f}% Waste: ${:.2f}'.form
     unused_space, impMemorySize, percent_unused, waste))
 print('Unused Cache Blocks:\t{:d} / {:d}'.format(
     totalNumBlocks - compulsoryMiss, totalNumBlocks))
+
+
+with open('out.csv', 'a') as f:
+    this = '\n'+str(cacheSize)+','+str(blockSize)+','+str(associativity)+','+str(replacementPolicy)+','+str(totalNumBlocks)+','+str(tagSize)+','+str(cacheIndexBits)+','+str(totalNumRows)+','+str(overHead)+','+str(impMemorySize)+','+str(cost)+','+str(cacheAccessCnt)+','+str(hit)+','+str(compulsoryMiss+conflictMiss)+','+str(compulsoryMiss)+','+str(conflictMiss)+','+str(hit_rate)+','+str(100-hit_rate)+','+str(CPI)+','+str(percent_unused)+','+str(totalNumBlocks-compulsoryMiss)+','+str(waste)
+    f.write(this)
