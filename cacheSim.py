@@ -45,14 +45,20 @@ print("Associativity:", "\t\t\t", associativity)
 print("Replacement Policy:", "\t\t",
       'Random' if replacementPolicy == 'RND' else 'Round Robin')
 
+
+# To calculate the addressSpace = add tagSize + cacheIndexBits + offsetbits
+
 associativityBits = int(math.log(associativity, 2))
+# adding 10 bits because cachesize is in KB to converting to bytes
 accessBits = int(math.log(cacheSize, 2) + 10)
 offsetBits = int(math.log(blockSize, 2))
 cacheIndexBits = accessBits - offsetBits - associativityBits
 addressSpaceBits = 32
 tagSize = addressSpaceBits - cacheIndexBits - offsetBits
-totalNumRows = pow(2, cacheIndexBits)  # also can be called number of sets
-# int((cacheSize*pow(2,10))/blockSize)
+# also can be called number of sets --- totalnumBlocks / associativity
+totalNumRows = pow(2, cacheIndexBits)
+
+# or cachesize(converTObyte) / bytes per block
 totalNumBlocks = totalNumRows * associativity
 overHead = int((totalNumRows * associativity) * (tagSize / 8) +
                (totalNumRows * associativity / 8))
