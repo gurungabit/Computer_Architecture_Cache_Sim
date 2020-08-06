@@ -4,3 +4,6 @@ python cacheSim.py -f Trace1.trc -s 512 -b 16 -a 8 -r RR
 python cacheSim.py -f Usethisfile.trc -s 512 -b 32 -a 4 -r RR
 
 python cacheSim.py -f Usethisfile.trc -s 1024 -b 64 -a 8 -r RND
+
+
+python cacheSim.py -f A-9_new_1.5.pdf.trc -s 1024 -b 64 -a 8 -r RND
