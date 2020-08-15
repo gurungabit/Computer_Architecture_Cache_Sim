@@ -51,6 +51,7 @@ print("Replacement Policy:", "\t\t",
 associativityBits = int(math.log(associativity, 2))
 # adding 10 bits because cachesize is in KB to converting to bytes
 accessBits = int(math.log(cacheSize, 2) + 10)
+print(accessBits)
 offsetBits = int(math.log(blockSize, 2))
 cacheIndexBits = accessBits - offsetBits - associativityBits
 addressSpaceBits = 32
@@ -65,6 +66,8 @@ overHead = int((totalNumRows * associativity) * (tagSize / 8) +
 impMemorySize = cacheSize + overHead / pow(2, 10)
 impMemorySizeBytes = impMemorySize * pow(2, 10)
 
+test = tagSize + cacheIndexBits + offsetBits
+print("addressSpace = ", test)
 # USE COST 0.05 to match output cost
 cost = impMemorySize * costPerBit
 print("\n", "*"*5, "Cache Calculated Values", "*"*5, "\n")
